@@ -1,9 +1,11 @@
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::{JsCast, intern};
 use js_sys::Reflect;
-use web_sys::{HtmlElement, Element, Node, Window, History, Document, Text, Comment, DomTokenList, CssStyleSheet, CssStyleDeclaration, HtmlStyleElement, CssRule};
-use crate::utils::UnwrapJsExt;
+use wasm_bindgen::{intern, prelude::*, JsCast};
+use web_sys::{
+    Comment, CssRule, CssStyleDeclaration, CssStyleSheet, Document, DomTokenList, Element, History,
+    HtmlElement, HtmlStyleElement, Node, Text, Window,
+};
 
+use crate::utils::UnwrapJsExt;
 
 // TODO move this into wasm-bindgen or gloo or something
 // TODO maybe use Object for obj ?
@@ -11,7 +13,6 @@ use crate::utils::UnwrapJsExt;
 pub(crate) fn set_property(obj: &JsValue, name: &str, value: &JsValue) {
     Reflect::set(obj, &JsValue::from(name), value).unwrap_js();
 }
-
 
 thread_local! {
     pub static WINDOW: Window = web_sys::window().unwrap_throw();
@@ -35,14 +36,16 @@ pub(crate) fn current_url() -> String {
 #[track_caller]
 pub(crate) fn go_to_url(url: &str) {
     HISTORY.with(|h| {
-        h.push_state_with_url(&JsValue::NULL, "", Some(url)).unwrap_js();
+        h.push_state_with_url(&JsValue::NULL, "", Some(url))
+            .unwrap_js();
     });
 }
 
 #[track_caller]
 pub(crate) fn replace_url(url: &str) {
     HISTORY.with(|h| {
-        h.replace_state_with_url(&JsValue::NULL, "", Some(url)).unwrap_js();
+        h.replace_state_with_url(&JsValue::NULL, "", Some(url))
+            .unwrap_js();
     });
 }
 
@@ -51,7 +54,10 @@ pub(crate) fn create_stylesheet(css: Option<&str>) -> CssStyleSheet {
     DOCUMENT.with(|document| {
         // TODO use createElementNS ?
         // TODO use dyn_into ?
-        let e: HtmlStyleElement = document.create_element("style").unwrap_js().unchecked_into();
+        let e: HtmlStyleElement = document
+            .create_element("style")
+            .unwrap_js()
+            .unchecked_into();
         e.set_type("text/css");
 
         if let Some(css) = css {
@@ -73,7 +79,6 @@ pub(crate) fn make_rule(sheet: &CssStyleSheet, rule: &str) -> Result<CssRule, Js
     // TODO use dyn_into ?
     Ok(rules.get(length).unwrap_throw())
 }
-
 
 pub(crate) fn get_element_by_id(id: &str) -> Element {
     DOCUMENT.with(|d| d.get_element_by_id(id).unwrap_throw())
@@ -116,7 +121,8 @@ pub(crate) fn set_attribute(elem: &Element, key: &str, value: &str) {
 
 #[track_caller]
 pub(crate) fn set_attribute_ns(elem: &Element, namespace: &str, key: &str, value: &str) {
-    elem.set_attribute_ns(Some(namespace), key, value).unwrap_js();
+    elem.set_attribute_ns(Some(namespace), key, value)
+        .unwrap_js();
 }
 
 #[track_caller]
@@ -152,8 +158,14 @@ pub(crate) fn remove_style(style: &CssStyleDeclaration, name: &str) {
 
 #[track_caller]
 pub(crate) fn set_style(style: &CssStyleDeclaration, name: &str, value: &str, important: bool) {
-    let priority = if important { intern("important") } else { intern("") };
-    style.set_property_with_priority(name, value, priority).unwrap_js();
+    let priority = if important {
+        intern("important")
+    } else {
+        intern("")
+    };
+    style
+        .set_property_with_priority(name, value, priority)
+        .unwrap_js();
 }
 
 #[track_caller]

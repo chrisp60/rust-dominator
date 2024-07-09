@@ -1,6 +1,5 @@
 #[cfg(doc)]
-use crate::{DomBuilder, Dom, StylesheetBuilder, ClassBuilder};
-
+use crate::{ClassBuilder, Dom, DomBuilder, StylesheetBuilder};
 
 #[doc(hidden)]
 #[macro_export]
@@ -50,10 +49,7 @@ macro_rules! __internal_apply_methods_loop {
 /// Normally you would chain method calls like this:
 ///
 /// ```rust
-/// foo
-///     .bar()
-///     .qux(5)
-///     .corge("yes", "no")
+/// foo.bar().qux(5).corge("yes", "no")
 /// ```
 ///
 /// But with `apply_methods!` you can instead do this:
@@ -126,8 +122,8 @@ macro_rules! __internal_apply_methods_loop {
 ///
 /// The first argument is *always* an `ident`, regardless of what the object is.
 ///
-/// If the macro doesn't accept any arguments, then it must be written like this,
-/// with a trailing comma:
+/// If the macro doesn't accept any arguments, then it must be written like
+/// this, with a trailing comma:
 ///
 /// ```rust
 /// macro_rules! my_macro {
@@ -137,7 +133,8 @@ macro_rules! __internal_apply_methods_loop {
 /// }
 /// ```
 ///
-/// In addition to `foo!()` macros, you can also use `foo![]` and `foo! {}` macros.
+/// In addition to `foo!()` macros, you can also use `foo![]` and `foo! {}`
+/// macros.
 ///
 /// And the macro can have whatever syntax it wants, because it's a macro:
 ///
@@ -156,7 +153,8 @@ macro_rules! __internal_apply_methods_loop {
 ///
 /// # Using `$crate`
 ///
-/// Rust has a limitation where you cannot use `$crate` inside of macros, which means this does not work:
+/// Rust has a limitation where you cannot use `$crate` inside of macros, which
+/// means this does not work:
 ///
 /// ```rust
 /// apply_methods!(foo, {
@@ -174,7 +172,9 @@ macro_rules! __internal_apply_methods_loop {
 /// })
 /// ```
 ///
-/// Alternatively, if you are using the [`html!`](crate::html) or [`svg!`](crate::svg) macros then you can use the [`apply`](DomBuilder::apply) method:
+/// Alternatively, if you are using the [`html!`](crate::html) or
+/// [`svg!`](crate::svg) macros then you can use the
+/// [`apply`](DomBuilder::apply) method:
 ///
 /// ```rust
 /// html!("div", {
@@ -187,7 +187,6 @@ macro_rules! apply_methods {
         $crate::__internal_apply_methods_loop!((), $($args)*)
     };
 }
-
 
 #[doc(hidden)]
 #[macro_export]
@@ -207,7 +206,6 @@ macro_rules! __internal_builder {
         $crate::DomBuilder::into_dom(output)
     }};
 }
-
 
 /// Gives access to the internal DOM node.
 ///
@@ -233,12 +231,13 @@ macro_rules! with_node {
     }};
 }
 
-
 /// Conditionally runs the methods based on a [`cfg` rule](https://doc.rust-lang.org/reference/conditional-compilation.html#the-cfg-attribute).
 ///
-/// Sometimes you want to run some [`DomBuilder`] methods only in certain situations.
+/// Sometimes you want to run some [`DomBuilder`] methods only in certain
+/// situations.
 ///
-/// For example, you might have some client-only code, and some server-only code. So you can do this:
+/// For example, you might have some client-only code, and some server-only
+/// code. So you can do this:
 ///
 /// ```rust
 /// html!("div", {
@@ -279,12 +278,12 @@ macro_rules! with_cfg {
     }};
 }
 
-
 /// Attaches a shadow root to a [`DomBuilder`].
 ///
 /// The first argument is the [shadow root mode](https://developer.mozilla.org/en-US/docs/Web/API/ShadowRoot/mode) ([`ShadowRootMode::Open`](web_sys::ShadowRootMode::Open) or [`ShadowRootMode::Closed`](web_sys::ShadowRootMode::Closed)).
 ///
-/// The second argument is a block of method calls. Inside of the block you can use [`DomBuilder<web_sys::ShadowRoot>`] methods:
+/// The second argument is a block of method calls. Inside of the block you can
+/// use [`DomBuilder<web_sys::ShadowRoot>`] methods:
 ///
 /// ```rust
 /// use web_sys::ShadowRootMode;
@@ -298,9 +297,11 @@ macro_rules! with_cfg {
 /// })
 /// ```
 ///
-/// The method calls are applied to the shadow root, not the parent [`DomBuilder`].
+/// The method calls are applied to the shadow root, not the parent
+/// [`DomBuilder`].
 ///
-/// The block uses the [`apply_methods!`] macro, see the docs for [`apply_methods!`] for more details.
+/// The block uses the [`apply_methods!`] macro, see the docs for
+/// [`apply_methods!`] for more details.
 #[macro_export]
 macro_rules! shadow_root {
     ($this:ident, $mode:expr => { $($methods:tt)* }) => {{
@@ -310,12 +311,12 @@ macro_rules! shadow_root {
     }};
 }
 
-
 /// Creates an HTML [`Dom`] node.
 ///
 /// The first argument is the [HTML tag](https://developer.mozilla.org/en-US/docs/Web/HTML/Element), and the second argument is a block of method calls.
 ///
-/// Inside of the block you can use [`DomBuilder<web_sys::HtmlElement>`] methods:
+/// Inside of the block you can use [`DomBuilder<web_sys::HtmlElement>`]
+/// methods:
 ///
 /// ```rust
 /// html!("div", {
@@ -325,7 +326,8 @@ macro_rules! shadow_root {
 /// })
 /// ```
 ///
-/// The block uses the [`apply_methods!`] macro, see the docs for [`apply_methods!`] for more details.
+/// The block uses the [`apply_methods!`] macro, see the docs for
+/// [`apply_methods!`] for more details.
 ///
 /// You can also specify the static type of the HTML element:
 ///
@@ -343,7 +345,6 @@ macro_rules! html {
     };
 }
 
-
 /// Creates an SVG [`Dom`] node.
 ///
 /// The first argument is the [SVG tag](https://developer.mozilla.org/en-US/docs/Web/SVG/Element), and the second argument is a block of method calls.
@@ -358,7 +359,8 @@ macro_rules! html {
 /// })
 /// ```
 ///
-/// The block uses the [`apply_methods!`] macro, see the docs for [`apply_methods!`] for more details.
+/// The block uses the [`apply_methods!`] macro, see the docs for
+/// [`apply_methods!`] for more details.
 ///
 /// You can also specify the static type of the SVG element:
 ///
@@ -376,12 +378,13 @@ macro_rules! svg {
     };
 }
 
-
 /// Converts an existing DOM node into a dominator [`Dom`] node.
 ///
-/// This is useful for applying [`DomBuilder`] methods to an already-existing DOM node (for example a third-party library).
+/// This is useful for applying [`DomBuilder`] methods to an already-existing
+/// DOM node (for example a third-party library).
 ///
-/// The first argument is the DOM node, and the second argument is a block of method calls.
+/// The first argument is the DOM node, and the second argument is a block of
+/// method calls.
 ///
 /// Inside of the block you can use [`DomBuilder`] methods:
 ///
@@ -393,7 +396,8 @@ macro_rules! svg {
 /// })
 /// ```
 ///
-/// The block uses the [`apply_methods!`] macro, see the docs for [`apply_methods!`] for more details.
+/// The block uses the [`apply_methods!`] macro, see the docs for
+/// [`apply_methods!`] for more details.
 #[macro_export]
 macro_rules! dom_builder {
     ($node:expr, { $($methods:tt)* }) => {{
@@ -403,13 +407,13 @@ macro_rules! dom_builder {
     }};
 }
 
-
 /// Creates a global CSS stylesheet.
 ///
-/// The stylesheet applies to the entire page, it is the same as importing a `.css` file,
-/// except the stylesheet is created entirely with Rust code.
+/// The stylesheet applies to the entire page, it is the same as importing a
+/// `.css` file, except the stylesheet is created entirely with Rust code.
 ///
-/// The first argument is the CSS selector, and the second argument is a block of method calls.
+/// The first argument is the CSS selector, and the second argument is a block
+/// of method calls.
 ///
 /// Inside of the block you can use [`StylesheetBuilder`] methods:
 ///
@@ -421,7 +425,8 @@ macro_rules! dom_builder {
 /// });
 /// ```
 ///
-/// The block uses the [`apply_methods!`] macro, see the docs for [`apply_methods!`] for more details.
+/// The block uses the [`apply_methods!`] macro, see the docs for
+/// [`apply_methods!`] for more details.
 #[macro_export]
 macro_rules! stylesheet {
     ($rule:expr) => {
@@ -432,19 +437,19 @@ macro_rules! stylesheet {
     };
 }
 
-
 /// Creates a locally scoped CSS stylesheet.
 ///
-/// Normally CSS is global, which means you can accidentally create name collisions by using
-/// the same class name multiple times.
+/// Normally CSS is global, which means you can accidentally create name
+/// collisions by using the same class name multiple times.
 ///
-/// However, if you use the `class!` macro, then it is impossible to have name collisions,
-/// because the CSS is locally scoped.
+/// However, if you use the `class!` macro, then it is impossible to have name
+/// collisions, because the CSS is locally scoped.
 ///
-/// This makes it a lot easier to create self-contained components, so you should prefer
-/// to use `class!` as much as you can.
+/// This makes it a lot easier to create self-contained components, so you
+/// should prefer to use `class!` as much as you can.
 ///
-/// The `class!` macro accepts a block of method calls. Inside of the block you can use [`ClassBuilder`] methods:
+/// The `class!` macro accepts a block of method calls. Inside of the block you
+/// can use [`ClassBuilder`] methods:
 ///
 /// ```rust
 /// class! {
@@ -454,10 +459,11 @@ macro_rules! stylesheet {
 /// }
 /// ```
 ///
-/// The block uses the [`apply_methods!`] macro, see the docs for [`apply_methods!`] for more details.
+/// The block uses the [`apply_methods!`] macro, see the docs for
+/// [`apply_methods!`] for more details.
 ///
-/// The `class!` macro returns a `String`, which is a unique class name. You can then assign that class
-/// name to a [`DomBuilder`]:
+/// The `class!` macro returns a `String`, which is a unique class name. You can
+/// then assign that class name to a [`DomBuilder`]:
 ///
 /// ```rust
 /// use once_cell::sync::Lazy;
@@ -476,21 +482,25 @@ macro_rules! stylesheet {
 /// })
 /// ```
 ///
-/// The class is locally scoped, which means it cannot conflict with any other classes, the only way
-/// to access the class is by using the `MY_CLASS` variable.
+/// The class is locally scoped, which means it cannot conflict with any other
+/// classes, the only way to access the class is by using the `MY_CLASS`
+/// variable.
 ///
-/// Because it is a normal Rust variable, it follows the normal Rust scoping rules. By default the variable
-/// can only be acccessed within that module.
+/// Because it is a normal Rust variable, it follows the normal Rust scoping
+/// rules. By default the variable can only be acccessed within that module.
 ///
 /// But you can use `pub` to export it so it can be used by other modules:
 ///
 /// ```rust
-/// pub static MY_CLASS: Lazy<String> = Lazy::new(|| class! {
-///     ...
+/// pub static MY_CLASS: Lazy<String> = Lazy::new(|| {
+///     class! {
+///         ...
+///     }
 /// });
 /// ```
 ///
-/// Or you can use `pub(crate)` so that it can only be accessed within your crate.
+/// Or you can use `pub(crate)` so that it can only be accessed within your
+/// crate.
 #[macro_export]
 macro_rules! class {
     (#![prefix = $name:literal] $($methods:tt)*) => {{
@@ -501,14 +511,14 @@ macro_rules! class {
     }};
 }
 
-
 /// Adds a pseudo rule to a [`class!`] stylesheet.
 ///
 /// A pseudo rule is either a [pseudo class](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes) or a [pseudo element](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-elements).
 ///
 /// The first argument is a string, or an array of strings.
 ///
-/// The second argument is a block of method calls. Inside of the block you can use [`ClassBuilder`] methods:
+/// The second argument is a block of method calls. Inside of the block you can
+/// use [`ClassBuilder`] methods:
 ///
 /// ```rust
 /// class! {
@@ -520,9 +530,11 @@ macro_rules! class {
 /// }
 /// ```
 ///
-/// The block uses the [`apply_methods!`] macro, see the docs for [`apply_methods!`] for more details.
+/// The block uses the [`apply_methods!`] macro, see the docs for
+/// [`apply_methods!`] for more details.
 ///
-/// If the first argument is an array of strings, it will try each pseudo rule in order until it finds one that works.
+/// If the first argument is an array of strings, it will try each pseudo rule
+/// in order until it finds one that works.
 ///
 /// This is useful for using browser prefixes:
 ///
@@ -544,9 +556,8 @@ macro_rules! pseudo {
     }};
 }
 
-
-// TODO this is pretty inefficient, it iterates over the token tree one token at a time
-// TODO this should only work for ::std::clone::Clone::clone
+// TODO this is pretty inefficient, it iterates over the token tree one token at
+// a time TODO this should only work for ::std::clone::Clone::clone
 #[doc(hidden)]
 #[macro_export]
 macro_rules! __internal_clone_split {
@@ -563,7 +574,8 @@ macro_rules! __internal_clone_split {
 // TODO move into gloo ?
 /// Helper utility that calls [`clone`](std::clone::Clone::clone).
 ///
-/// When you use event listeners, you often need to [`clone`](std::clone::Clone::clone) some state:
+/// When you use event listeners, you often need to
+/// [`clone`](std::clone::Clone::clone) some state:
 ///
 /// ```rust
 /// let app = app.clone();
@@ -591,7 +603,6 @@ macro_rules! clone {
     ($($input:tt)*) => { $crate::__internal_clone_split!((), $($input)*) };
 }
 
-
 #[doc(hidden)]
 #[macro_export]
 macro_rules! __internal_process_keys {
@@ -615,7 +626,6 @@ macro_rules! __internal_process_keys {
         $crate::__internal_process_keys!($this, (), ($($accum)* $key => $value,), $call)
     };
 }
-
 
 /// A convenient shorthand for multiple `.attr(...)` calls.
 ///
@@ -668,7 +678,6 @@ macro_rules! __internal_attrs {
     };
 }
 
-
 /// A convenient shorthand for multiple `.prop(...)` calls.
 ///
 /// Instead of writing this...
@@ -719,7 +728,6 @@ macro_rules! __internal_props {
         })
     };
 }
-
 
 /// A convenient shorthand for multiple `.style(...)` calls.
 ///

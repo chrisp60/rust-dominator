@@ -1,25 +1,24 @@
-use std::rc::Rc;
-use std::cell::RefCell;
-use std::future::Future;
-use std::iter::IntoIterator;
+use std::{cell::RefCell, future::Future, iter::IntoIterator, rc::Rc};
 
 use discard::{Discard, DiscardOnDrop};
+use futures_signals::{
+    cancelable_future,
+    signal::{Signal, SignalExt},
+    signal_vec::{SignalVec, SignalVecExt, VecDiff},
+    CancelableFutureHandle,
+};
 use futures_util::future::ready;
-use futures_signals::{cancelable_future, CancelableFutureHandle};
-use futures_signals::signal::{Signal, SignalExt};
-use futures_signals::signal_vec::{VecDiff, SignalVec, SignalVecExt};
-use web_sys::Node;
 use wasm_bindgen::UnwrapThrowExt;
 use wasm_bindgen_futures::spawn_local;
+use web_sys::Node;
 
-use crate::bindings;
-use crate::dom::Dom;
-use crate::callbacks::Callbacks;
-
+use crate::{bindings, callbacks::Callbacks, dom::Dom};
 
 #[inline]
 pub(crate) fn spawn_future<F>(future: F) -> DiscardOnDrop<CancelableFutureHandle>
-    where F: Future<Output = ()> + 'static {
+where
+    F: Future<Output = ()> + 'static,
+{
     // TODO make this more efficient ?
     let (handle, future) = cancelable_future(future, || ());
 
@@ -28,47 +27,53 @@ pub(crate) fn spawn_future<F>(future: F) -> DiscardOnDrop<CancelableFutureHandle
     handle
 }
 
-
 #[inline]
 pub(crate) fn for_each<A, B>(signal: A, mut callback: B) -> CancelableFutureHandle
-    where A: Signal + 'static,
-          B: FnMut(A::Item) + 'static {
-
+where
+    A: Signal + 'static,
+    B: FnMut(A::Item) + 'static,
+{
     DiscardOnDrop::leak(spawn_future(signal.for_each(move |value| {
         callback(value);
         ready(())
     })))
 }
-
 
 #[inline]
 fn for_each_vec<A, B>(signal: A, mut callback: B) -> CancelableFutureHandle
-    where A: SignalVec + 'static,
-          B: FnMut(VecDiff<A::Item>) + 'static {
-
+where
+    A: SignalVec + 'static,
+    B: FnMut(VecDiff<A::Item>) + 'static,
+{
     DiscardOnDrop::leak(spawn_future(signal.for_each(move |value| {
         callback(value);
         ready(())
     })))
 }
 
-
 pub(crate) fn insert_children_one(element: &Node, callbacks: &mut Callbacks, dom: &mut Dom) {
     // TODO can this be made more efficient ?
-    callbacks.after_insert.append(&mut dom.callbacks.after_insert);
-    callbacks.after_remove.append(&mut dom.callbacks.after_remove);
+    callbacks
+        .after_insert
+        .append(&mut dom.callbacks.after_insert);
+    callbacks
+        .after_remove
+        .append(&mut dom.callbacks.after_remove);
 
     bindings::append_child(element, &dom.element);
 }
 
 #[inline]
-pub(crate) fn insert_children_iter<A: std::borrow::BorrowMut<Dom>, B: IntoIterator<Item = A>>(element: &Node, callbacks: &mut Callbacks, value: B) {
+pub(crate) fn insert_children_iter<A: std::borrow::BorrowMut<Dom>, B: IntoIterator<Item = A>>(
+    element: &Node,
+    callbacks: &mut Callbacks,
+    value: B,
+) {
     for mut dom in value {
         let dom = std::borrow::BorrowMut::borrow_mut(&mut dom);
         insert_children_one(element, callbacks, dom);
     }
 }
-
 
 fn after_insert(is_inserted: bool, callbacks: &mut Callbacks) {
     callbacks.leak();
@@ -78,11 +83,11 @@ fn after_insert(is_inserted: bool, callbacks: &mut Callbacks) {
     }
 }
 
-
 #[inline]
 pub(crate) fn insert_child_signal<A>(element: Node, callbacks: &mut Callbacks, signal: A)
-    where A: Signal<Item = Option<Dom>> + 'static {
-
+where
+    A: Signal<Item = Option<Dom>> + 'static,
+{
     struct State {
         is_inserted: bool,
         child: Option<Dom>,
@@ -165,11 +170,11 @@ pub(crate) fn insert_child_signal<A>(element: Node, callbacks: &mut Callbacks, s
     });
 }
 
-
 #[inline]
 pub(crate) fn insert_children_signal_vec<A>(element: Node, callbacks: &mut Callbacks, signal: A)
-    where A: SignalVec<Item = Dom> + 'static {
-
+where
+    A: SignalVec<Item = Dom> + 'static,
+{
     struct State {
         element: Node,
         marker: Node,
@@ -217,7 +222,6 @@ pub(crate) fn insert_children_signal_vec<A>(element: Node, callbacks: &mut Callb
         fn insert_at(&self, new_index: usize, child: &Node) {
             if let Some(dom) = self.children.get(new_index) {
                 bindings::insert_child_before(&self.element, child, &dom.element);
-
             } else {
                 bindings::insert_child_before(&self.element, child, &self.marker);
             }
@@ -239,7 +243,7 @@ pub(crate) fn insert_children_signal_vec<A>(element: Node, callbacks: &mut Callb
 
                         after_insert(is_inserted, &mut dom.callbacks);
                     }
-                },
+                }
 
                 VecDiff::InsertAt { index, mut value } => {
                     self.insert_at(index, &value.element);
@@ -248,7 +252,7 @@ pub(crate) fn insert_children_signal_vec<A>(element: Node, callbacks: &mut Callb
 
                     // TODO figure out a way to move this to the top
                     self.children.insert(index, value);
-                },
+                }
 
                 VecDiff::Push { mut value } => {
                     bindings::insert_child_before(&self.element, &value.element, &self.marker);
@@ -257,7 +261,7 @@ pub(crate) fn insert_children_signal_vec<A>(element: Node, callbacks: &mut Callb
 
                     // TODO figure out a way to move this to the top
                     self.children.push(value);
-                },
+                }
 
                 VecDiff::UpdateAt { index, mut value } => {
                     let dom = &mut self.children[index];
@@ -271,15 +275,18 @@ pub(crate) fn insert_children_signal_vec<A>(element: Node, callbacks: &mut Callb
                     ::std::mem::swap(dom, &mut value);
 
                     value.callbacks.discard();
-                },
+                }
 
-                VecDiff::Move { old_index, new_index } => {
+                VecDiff::Move {
+                    old_index,
+                    new_index,
+                } => {
                     let value = self.children.remove(old_index);
 
                     self.insert_at(new_index, &value.element);
 
                     self.children.insert(new_index, value);
-                },
+                }
 
                 VecDiff::RemoveAt { index } => {
                     let dom = self.children.remove(index);
@@ -287,7 +294,7 @@ pub(crate) fn insert_children_signal_vec<A>(element: Node, callbacks: &mut Callb
                     bindings::remove_child(&self.element, &dom.element);
 
                     dom.callbacks.discard();
-                },
+                }
 
                 VecDiff::Pop {} => {
                     let dom = self.children.pop().unwrap_throw();
@@ -295,11 +302,11 @@ pub(crate) fn insert_children_signal_vec<A>(element: Node, callbacks: &mut Callb
                     bindings::remove_child(&self.element, &dom.element);
 
                     dom.callbacks.discard();
-                },
+                }
 
                 VecDiff::Clear {} => {
                     self.clear();
-                },
+                }
             }
         }
     }

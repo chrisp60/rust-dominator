@@ -1,15 +1,16 @@
 use std::borrow::Cow;
 
-use web_sys::{EventTarget, HtmlElement};
-use once_cell::sync::Lazy;
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
+use once_cell::sync::Lazy;
+use web_sys::{EventTarget, HtmlElement};
 
-use crate::bindings;
-use crate::bindings::WINDOW;
-use crate::dom::{Dom, DomBuilder, EventOptions};
-use crate::utils::EventListener;
-use crate::events;
-
+use crate::{
+    bindings,
+    bindings::WINDOW,
+    dom::{Dom, DomBuilder, EventOptions},
+    events,
+    utils::EventListener,
+};
 
 // TODO inline ?
 fn change_url(mutable: &Mutable<String>) {
@@ -23,7 +24,6 @@ fn change_url(mutable: &Mutable<String>) {
         *lock = new_url;
     }
 }
-
 
 struct CurrentUrl {
     value: Mutable<String>,
@@ -44,21 +44,16 @@ impl CurrentUrl {
             })
         });
 
-        Self {
-            value,
-        }
+        Self { value }
     }
 }
 
-
 static URL: Lazy<CurrentUrl> = Lazy::new(|| CurrentUrl::new());
-
 
 #[inline]
 pub fn url() -> ReadOnlyMutable<String> {
     URL.value.read_only()
 }
-
 
 /// Update the current route by adding a new entry to the history.
 // TODO if URL hasn't been created yet, don't create it
@@ -88,8 +83,10 @@ pub fn replace_url(new_url: &str) {
 #[deprecated(since = "0.5.1", note = "Use the on_click_go_to_url macro instead")]
 #[inline]
 pub fn on_click_go_to_url<A, B>(new_url: A) -> impl FnOnce(DomBuilder<B>) -> DomBuilder<B>
-    where A: Into<Cow<'static, str>>,
-          B: AsRef<EventTarget> {
+where
+    A: Into<Cow<'static, str>>,
+    B: AsRef<EventTarget>,
+{
     let new_url = new_url.into();
 
     #[inline]
@@ -101,15 +98,16 @@ pub fn on_click_go_to_url<A, B>(new_url: A) -> impl FnOnce(DomBuilder<B>) -> Dom
     }
 }
 
-
 // TODO better type than HtmlElement
 // TODO maybe make this a macro ?
 #[deprecated(since = "0.5.1", note = "Use the link macro instead")]
 #[allow(deprecated)]
 #[inline]
 pub fn link<A, F>(url: A, f: F) -> Dom
-    where A: Into<Cow<'static, str>>,
-          F: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
+where
+    A: Into<Cow<'static, str>>,
+    F: FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
+{
     let url = url.into();
 
     html!("a", {
@@ -119,17 +117,17 @@ pub fn link<A, F>(url: A, f: F) -> Dom
     })
 }
 
-
 // TODO test this
 /// Changes an `<a>` element to work with routing.
 ///
-/// Normally when the user clicks on an `<a>` element the browser will handle the URL
-/// routing.
+/// Normally when the user clicks on an `<a>` element the browser will handle
+/// the URL routing.
 ///
 /// But if you are creating a [Single Page Application](https://developer.mozilla.org/en-US/docs/Glossary/SPA) (SPA)
 /// then you want your app to always be in control of routing.
 ///
-/// The `on_click_go_to_url!` macro disables the browser routing for the `<a>`, so your app remains in control of routing:
+/// The `on_click_go_to_url!` macro disables the browser routing for the `<a>`,
+/// so your app remains in control of routing:
 ///
 /// ```rust
 /// html!("a", {
@@ -143,24 +141,27 @@ macro_rules! on_click_go_to_url {
     ($this:ident, $url:expr) => {{
         let url = $url;
 
-        $this.event_with_options(&$crate::EventOptions::preventable(), move |e: $crate::events::Click| {
-            e.prevent_default();
-            $crate::routing::go_to_url(&url);
-        })
+        $this.event_with_options(
+            &$crate::EventOptions::preventable(),
+            move |e: $crate::events::Click| {
+                e.prevent_default();
+                $crate::routing::go_to_url(&url);
+            },
+        )
     }};
 }
-
 
 // TODO test this
 /// Creates an `<a>` element which works with routing.
 ///
-/// Normally when the user clicks on an `<a>` element the browser will handle the URL
-/// routing.
+/// Normally when the user clicks on an `<a>` element the browser will handle
+/// the URL routing.
 ///
 /// But if you are creating a [Single Page Application](https://developer.mozilla.org/en-US/docs/Glossary/SPA) (SPA)
 /// then you want your app to always be in control of routing.
 ///
-/// The `link!` macro creates an `<a>` element which disables browser routing, so your app remains in control of routing:
+/// The `link!` macro creates an `<a>` element which disables browser routing,
+/// so your app remains in control of routing:
 ///
 /// ```rust
 /// link!("/my-url/foo", {

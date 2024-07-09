@@ -1,6 +1,6 @@
 use std;
-use discard::Discard;
 
+use discard::Discard;
 
 // TODO a bit gross
 trait IRemove {
@@ -13,7 +13,6 @@ impl<A: Discard> IRemove for A {
         self.discard();
     }
 }
-
 
 #[repr(transparent)]
 pub(crate) struct InsertCallback(Box<dyn FnOnce(&mut Callbacks)>);
@@ -33,7 +32,6 @@ impl std::fmt::Debug for RemoveCallback {
         write!(formatter, "RemoveCallback")
     }
 }
-
 
 #[derive(Debug)]
 pub(crate) struct Callbacks {
@@ -100,7 +98,6 @@ impl Callbacks {
         self.trigger_remove = false;
     }
 }
-
 
 // TODO use DiscardOnDrop instead
 impl Drop for Callbacks {
