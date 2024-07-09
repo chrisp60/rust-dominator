@@ -734,6 +734,12 @@ impl<A> DomBuilder<A>
 where
     A: Clone,
 {
+    /// Returns the internal element by cloning.
+    #[inline]
+    pub fn element(&self) -> A {
+        self.element.clone()
+    }
+
     #[inline]
     #[doc(hidden)]
     pub fn __internal_element(&self) -> A {
